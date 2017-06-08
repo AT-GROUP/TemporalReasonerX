@@ -1023,7 +1023,20 @@ namespace AT_TemporalReasoner
         private bool EvalLog(XElement Node, Dictionary<string, string> CurrentData)
         {
             string value = Node.Elements().ElementAt(0).Attribute("Value").Value;
-            if (CurrentData.ContainsKey(value))
+
+            if ("LogOp".Equals(Node.Name.ToString())) {
+                switch (Node.Attribute("Value").Value)
+                {
+                    case "NOT":
+                        return !EvalLog(Node.Elements().ElementAt(0), CurrentData);
+                    case "AND":
+                        return EvalLog(Node.Elements().ElementAt(0), CurrentData) && EvalLog(Node.Elements().ElementAt(1), CurrentData);
+                    case "OR":
+                        return EvalLog(Node.Elements().ElementAt(0), CurrentData) || EvalLog(Node.Elements().ElementAt(1), CurrentData);
+                    case "XOR":
+                        return EvalLog(Node.Elements().ElementAt(0), CurrentData) ^ EvalLog(Node.Elements().ElementAt(1), CurrentData);
+                }
+            } else if (CurrentData.ContainsKey(value))
             {
                 switch (Node.Name.ToString())
                 {
@@ -1064,19 +1077,6 @@ namespace AT_TemporalReasoner
 
                             case "le":
                                 return (EvalAr(Node.Elements().ElementAt(0), CurrentData) <= EvalAr(Node.Elements().ElementAt(1), CurrentData));
-                        }
-                        break;
-                    case "LogOp":
-                        switch (Node.Attribute("Value").Value)
-                        {
-                            case "NOT":
-                                return !EvalLog(Node.Elements().ElementAt(0), CurrentData);
-                            case "AND":
-                                return EvalLog(Node.Elements().ElementAt(0), CurrentData) && EvalLog(Node.Elements().ElementAt(1), CurrentData);
-                            case "OR":
-                                return EvalLog(Node.Elements().ElementAt(0), CurrentData) || EvalLog(Node.Elements().ElementAt(1), CurrentData);
-                            case "XOR":
-                                return EvalLog(Node.Elements().ElementAt(0), CurrentData) ^ EvalLog(Node.Elements().ElementAt(1), CurrentData);
                         }
                         break;
                     case "TruthVal":
